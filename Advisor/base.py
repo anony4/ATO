@@ -101,6 +101,11 @@ class Baseline:
         for idx in range(1, len(self.observations)):
             contexts = np.vstack([contexts, self.observations[idx]['last_context']])
 
+        # min max normalization，同时避免除0错误
+        max_contexts = np.max(contexts, axis=0)
+        min_contexts = np.min(contexts, axis=0)
+        contexts = (contexts - min_contexts) / (max_contexts - min_contexts + 1e-8)
+
         return contexts
 
     def sample(self):

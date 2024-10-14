@@ -72,7 +72,14 @@ class ContextBO(Baseline):
     def update(self, config, perf, qps, context):
         super(ContextBO, self).update(config, perf, qps, context)
         if self.context_flag:
-            self.acq_optimizer.update_contex(context)
+            min_context = context
+            max_context = context
+            for idx in range(len(self.observations)):
+                min_context = np.min([min_context, self.observations[idx]['last_context']], axis=0)
+                max_context = np.max([min_context, self.observations[idx]['last_context']], axis=0)
+
+            tmp_context = (context - min_context) / (max_context - min_context + 1e-8)
+            self.acq_optimizer.update_contex(tmp_context)
         if self.tsd_flag == 'detect':
             self.ts_detection.update_context(np.hstack((context, [-perf, -qps])))
         print("successfully update context!")
